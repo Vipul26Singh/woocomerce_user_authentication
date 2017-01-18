@@ -138,7 +138,12 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 	}
 
 	function mobile_already_exists($mobile){
-		return false;
+		global $wpdb;
+		$user_count = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->prefix" . "usermeta WHERE meta_key = 'Mobile Number' and meta_value = " . sanitize_text_field($mobile));
+		if($user_count > 0)
+			return true;
+		else
+			return false;
 	}
 
 	function fmera_errors() {

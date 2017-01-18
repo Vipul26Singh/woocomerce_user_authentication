@@ -139,7 +139,9 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 
 	function mobile_already_exists($mobile){
 		global $wpdb;
-		$user_count = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->prefix" . "usermeta WHERE meta_key = 'Mobile Number' and meta_value = " . sanitize_text_field($mobile));
+		$user_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM ".$wpdb->prefix."usermeta WHERE meta_key = 'Mobile Number' and meta_value = '%s'", $mobile));
+
+
 		if($user_count > 0)
 			return true;
 		else

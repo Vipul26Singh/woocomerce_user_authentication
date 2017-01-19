@@ -12,7 +12,6 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 		add_action( 'woocommerce_register_form', array($this, 'minbazaar_extra_registration_form_end' ));
 		add_action( 'woocommerce_register_post', array($this, 'minbazaar_validate_extra_register_fields'), 10, 3 );
 		add_action( 'woocommerce_created_customer', array($this, 'minbazaar_save_extra_register_fields' ));
-		//add_action('woocommerce_before_my_account', array($this, 'fme_my_profile'));
 		/**add_action( 'init', array($this, 'add_fmera_query_vars' ));
 		add_action( 'template_include', array( $this, 'change_template' ) );
 		**/
@@ -26,7 +25,6 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 
 
 	function minbazaar_extra_registration_form_end() { 
-			$fields = $this->get_fields();
 
 				?>
 
@@ -85,72 +83,12 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 
 	function minbazaar_save_extra_register_fields($customer_id) {
 
-		$fields = $this->get_fields();
 			if ( isset( $_POST['reg_mobile'] ) || isset( $_FILES['reg_mobile'] ) ) {
 				update_user_meta( $customer_id, 'Mobile Number', sanitize_text_field( $_POST['reg_mobile'] ) );
 			}
 	}
 
 
-
-	function get_fields() {
-		global $wpdb;
-
-		$result = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM ".$wpdb->fmera_fields." WHERE field_type!='' AND type = %s ORDER BY length(sort_order), sort_order", 'registration'));      
-		return $result;
-	}
-
-
-
-	function fme_my_profile() { ?>
-		<div class="col2-set addresses">
-			<header class="title">
-			<h3><?php echo esc_attr_e($this->module_settings['profile_title']); ?></h3>
-			<?php $profile_url = wc_get_endpoint_url( 'edit-profile', get_current_user_id(), wc_get_page_permalink( 'myaccount' ) ); ?>
-			<a class="edit" href="<?php echo $profile_url; ?>">Edit</a>
-			</header>
-			</div>
-			<table class="shop_table shop_table_responsive my_account_orders">
-			<tbody>
-			<?php 
-			$user_id = get_current_user_id();
-		$fields =  $this->get_fields();
-		foreach ($fields as $field) {
-
-			$check = get_user_meta( $user_id, $field->field_name, true );
-			$label = $this->get_fieldByName($field->field_name);
-			if($check!='') {
-
-				$value = get_user_meta( $user_id, $field->field_name, true );
-				?>
-					<tr class="order" style="text-align:left">
-					<td style="width:30%;"><b><?php echo $label->field_label; ?></b></td>
-					<td>
-					<?php 
-					if($label->field_type=='checkbox' && $value==1) { 
-						echo "Yes";
-					} else if($label->field_type=='checkbox' && $value==0) {
-						echo "No";
-					} else if($label->field_type=='select' || $label->field_type=='radioselect') { 
-						$meta = $this->get_OptionByid($value, $label->field_id);
-						echo $meta->meta_value;
-					} else
-					{
-						echo $value;
-					}
-				?>
-					</td>
-					</tr>
-
-					<?php }
-		}
-
-		?>
-
-			</tbody>
-			</table>
-
-			<?php }
 
 
 }

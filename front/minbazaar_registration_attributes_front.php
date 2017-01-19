@@ -17,11 +17,11 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 		add_action( 'template_include', array( $this, 'change_template' ) );
 		**/
 
-		/**if (isset($_POST['action'])) {
+		if (isset($_POST['action'])) {
 			if ($_POST['action'] == 'SubmitRegForm') {
 				$this->submit_reg_edit_form($_POST['user_id']);
 			} 
-		}**/
+		}
 	}
 
 
@@ -36,94 +36,18 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 					</label>
 					<input type="text" class="input-text" name="reg_mobile" id="reg_mobile" value="<?php if ( ! empty( $_POST['reg_mobile'] ) ) esc_attr_e( $_POST['reg_mobile'] ); ?>" placeholder="Mobile Number" />
 					</p>
+					<div id="min_request_otp_div">
+        <button type="button" name="min_request_otp" id="min_request_otp" class="btn btn-default button button-medium" onclick="min_perform_otp_task()">
+                    <span>Validate Mobile<i class="fa fa-chevron-right right"></i></span>
+                </button>
+        <input type="hidden" id="min_timeout_otp" name="min_timeout_otp" value={$mobilenumberregister_otp_validity}>
+    </div>
+
 															
 	<?php }
 
 
 
-	function fme_extra_registration_form_edit($user_id) {  ?>
-
-		<h3><?php echo esc_attr_e($this->module_settings['profile_title']); ?></h3>
-			<?php $this->fmera_show_error_messages(); ?>
-
-			<?php 
-
-			$fields = $this->get_fields();
-		foreach ($fields as $field) { 
-
-			$value = get_user_meta( $user_id, $field->field_name, true );
-
-			if($field->field_type == 'text' && $field->is_hide == 0) {
-				?>
-
-					<p class="form-row <?php echo $field->width; ?>">
-					<label for="<?php echo $field->field_name; ?>"><?php _e( $field->field_label, 'woocommerce' ); ?> 
-					<?php if($field->is_required == 1) { ?> <span class="required">*</span> <?php } ?>
-					</label>
-					<input type="text" class="input-text" name="<?php echo $field->field_name; ?>" id="<?php echo $field->field_name; ?>" value="<?php echo $value; ?>" placeholder="<?php echo $field->field_placeholder; ?>" />
-					</p>
-
-					<?php } else if($field->field_type == 'textarea' && $field->is_hide == 0) { ?>
-
-						<p class="form-row <?php echo $field->width; ?>">
-							<label for="<?php echo $field->field_name; ?>"><?php _e( $field->field_label, 'woocommerce' ); ?> 
-							<?php if($field->is_required == 1) { ?> <span class="required">*</span> <?php } ?>
-							</label>
-							<textarea name="<?php echo $field->field_name; ?>" id="<?php echo $field->field_name; ?>" class="input-text" cols="5" rows="2" placeholder="<?php echo $field->field_placeholder; ?>"><?php echo $value; ?></textarea>
-
-							</p>
-
-							<?php } else if($field->field_type == 'select' && $field->is_hide == 0) { ?>
-
-								<p class="form-row <?php echo $field->width; ?>">
-									<label for="<?php echo $field->field_name; ?>"><?php _e( $field->field_label, 'woocommerce' ); ?> 
-									<?php if($field->is_required == 1) { ?> <span class="required">*</span> <?php } ?>
-									</label>
-									<select name="<?php echo $field->field_name; ?>" id="<?php echo $field->field_name; ?>">
-									<?php $options = $this->getSelectOptions($field->field_id);
-								foreach($options as $option) {
-									?>
-										<option value="<?php echo $option->meta_key; ?>"  <?php if($option->meta_key == $value) { echo "selected"; } ?>>
-										<?php echo $option->meta_value; ?>
-										</option>
-
-										<?php } ?>
-
-										</select>
-
-										</p>
-
-										<?php } else if($field->field_type == 'checkbox' && $field->is_hide == 0) { ?>
-
-											<p class="form-row <?php echo $field->width; ?>">
-
-												<input type="checkbox" name="<?php echo $field->field_name; ?>" value="<?php echo $value; ?>" <?php if($value == 1) { echo "checked"; } ?> class="input-checkbox">
-
-												<?php esc_attr_e( $field->field_label, 'woocommerce' ); ?> 
-												<?php if($field->is_required == 1) { ?> <span class="required">*</span> <?php } ?>
-
-												</p>
-
-												<?php } else if($field->field_type == 'radioselect' && $field->is_hide == 0) { ?>
-
-													<p class="form-row <?php echo $field->width; ?>">
-														<label for="<?php echo $field->field_name; ?>"><?php esc_attr_e( $field->field_label, 'woocommerce' ); ?> 
-														<?php if($field->is_required == 1) { ?> <span class="required">*</span> <?php } ?>
-														</label>
-														<?php $options = $this->getSelectOptions($field->field_id);
-													foreach($options as $option) {
-														?>
-
-															<input type="radio" name="<?php echo $field->field_name; ?>" value="<?php echo $option->meta_key; ?>" <?php if($option->meta_key == $value) { echo "checked"; } ?> class="input-checkbox"> <?php echo $option->meta_value; ?>
-
-															<?php } ?>
-															</p>
-
-															<?php } ?> 
-
-															<?php } ?>
-
-															<?php }
 
 	function minbazaar_validate_extra_register_fields($username, $email, $validation_errors) {
 
@@ -148,46 +72,15 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 			return false;
 	}
 
-	function fmera_errors() {
-		static $wp_error; // Will hold global variable safely
-		return isset($wp_error) ? $wp_error : ($wp_error = new WP_Error(null, null, null));
-	}
-
-	function fmera_show_error_messages() {
-		if($codes = $this->fmera_errors()->get_error_codes()) {
-			echo '<ul class="woocommerce-error">';
-			// Loop error codes and display errors
-			foreach($codes as $code){
-				$message = $this->fmera_errors()->get_error_message($code);
-				echo '<li>' . $message . '</li>';
-			}
-			echo '</ul>';
-		}	
-	}
 
 	function submit_reg_edit_form($user_id) {
-		$fields = $this->get_fields();
-		foreach ($fields as $field) { 
-
 			if ( isset( $_POST[$field->field_name] ) && empty( $_POST[$field->field_name] ) && ($field->is_required == 1)) {
 				$this->fmera_errors()->add( $field->field_name.'_error', __( $field->field_label.' is required!', 'woocommerce' ) );
 			} else {
-
-
-
-				if ( isset( $_POST[$field->field_name] ) || isset( $_FILES[$field->field_name] ) ) {
-
-
-
-					update_user_meta( $user_id, $field->field_name, sanitize_text_field( $_POST[$field->field_name] ) );
-
-
+				if ( isset( $_POST['reg_mobile'] ) || isset( $_FILES['reg_mobile'] ) ) {
+					update_user_meta( $user_id, 'Mobile Number', sanitize_text_field( $_POST['reg_mobile'] ) );
 				}
-
-
 			}
-
-		}
 	}
 
 	function minbazaar_save_extra_register_fields($customer_id) {
@@ -207,30 +100,6 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 		return $result;
 	}
 
-
-	function get_fieldByName($name) {
-		global $wpdb;
-
-		$result = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM ".$wpdb->fmera_fields." WHERE field_name = %s", $name));      
-		return $result;
-	}
-
-	function get_OptionByid($name, $id) {
-		global $wpdb;
-
-		$result = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM ".$wpdb->fmera_meta." WHERE meta_key = %s AND field_id = %d", $name, $id));      
-		return $result;
-	}
-
-
-
-	function getSelectOptions($id) {
-		global $wpdb;
-
-		$result = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM ".$wpdb->fmera_meta." WHERE field_id = %d", $id));      
-		return $result;
-
-	}
 
 
 	function fme_my_profile() { ?>

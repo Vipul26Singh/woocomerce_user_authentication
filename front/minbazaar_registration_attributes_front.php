@@ -7,7 +7,7 @@ if (!class_exists('Minbazaar_Registration_Attributes_Front')){
 class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Attributes {
 	public function __construct() {
 
-		//add_action( 'wp_loaded', array( $this, 'front_scripts' ) );
+		add_action( 'wp_loaded', array( $this, 'front_scripts' ) );
 		$this->module_settings = $this->get_module_settings();
 		add_action( 'woocommerce_register_form', array($this, 'minbazaar_extra_registration_form_end' ));
 		add_action( 'woocommerce_register_post', array($this, 'minbazaar_validate_extra_register_fields'), 10, 3 );
@@ -22,6 +22,11 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 			} 
 		}
 	}
+
+	public function front_scripts() {
+                wp_enqueue_style( 'minbua-front-css', plugins_url( '/css/minbua_style_front.css', __FILE__ ), false );
+                wp_enqueue_style( 'jquery-ui-css');
+        }
 
 
 	function minbazaar_extra_registration_form_end() { 
@@ -38,8 +43,22 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
         <button type="button" name="min_request_otp" id="min_request_otp" class="btn btn-default button button-medium" onclick="min_perform_otp_task()">
                     <span>Validate Mobile<i class="fa fa-chevron-right right"></i></span>
                 </button>
-        <input type="hidden" id="min_timeout_otp" name="min_timeout_otp" value={$mobilenumberregister_otp_validity}>
     </div>
+
+	<div id="min_otp_value_div" class="input-text">
+	<label for="otp_val"><?php esc_attr_e( 'Enter OTP', 'woocommerce' ); ?>
+	<span class="required">*</span>
+        <input type="input-text" class="input-text" name="min_otp_value" id="min_otp_value" />
+    </div>
+
+
+    <div id="min_progress_bar_div" >
+        <p class="input-text">Wait for some time before resending One time passsword</p>
+        <div  class="w3-progress-container">
+          <div id="min_progress_bar" class="w3-progressbar w3-green" style="width:1%"></div>
+        </div>
+    </div>
+    <br>
 
 															
 	<?php }

@@ -24,6 +24,9 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 	}
 
 	public function front_scripts() {
+		//wp_enqueue_script( 'jquery-ui');
+                wp_enqueue_script( 'minbua-front-jsssssss', plugins_url( '/js/javascript.js', __FILE__ ), null, false );
+	
                 wp_enqueue_style( 'minbua-front-css', plugins_url( '/css/minbua_style_front.css', __FILE__ ), false );
                 wp_enqueue_style( 'jquery-ui-css');
         }
@@ -34,31 +37,35 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 				?>
 
 					<p class="form-row">
-					<label for="reg_mobile"><?php esc_attr_e( 'Mobile Number', 'woocommerce' ); ?> 
-					 <span class="required">*</span> 
-					</label>
-					<input type="text" class="input-text" name="reg_mobile" id="reg_mobile" value="<?php if ( ! empty( $_POST['reg_mobile'] ) ) esc_attr_e( $_POST['reg_mobile'] ); ?>" placeholder="Mobile Number" />
+						<label for="reg_mobile"><?php esc_attr_e( 'Mobile Number', 'woocommerce' ); ?> 
+					 		<span class="required">*</span> 
+						</label>
+						<input type="text" class="input-text" name="reg_mobile" id="reg_mobile" value="<?php if ( ! empty( $_POST['reg_mobile'] ) ) esc_attr_e( $_POST['reg_mobile'] ); ?>" placeholder="Mobile Number" />
 					</p>
+					
+					<div id="min_otp_value_div" class="input-text" style="display:none">
+						<p class="form-row">
+							<label for="otp_val"><?php esc_attr_e( 'Enter OTP', 'woocommerce' ); ?>
+								<span class="required">*</span>
+							</label>
+        						<input type="input" class="input-text" name="min_otp_value" id="min_otp_value" value="<?php if ( ! empty( $_POST['min_otp_value'] ) ) esc_attr_e( $_POST['min_otp_value'] ); ?>" placeholder="One Time Password" />
+						</p>
+    					</div>
+
+    					<div id="min_progress_bar_div" style="display:none">
+        					<p class="input-text">Wait for some time before resending One time passsword</p>
+        					<div  class="w3-progress-container">
+          						<div id="min_progress_bar" class="w3-progressbar w3-green" style="width:1%"></div>
+        					</div>
+    					</div>
+					<br>	
 					<div id="min_request_otp_div">
-        <button type="button" name="min_request_otp" id="min_request_otp" class="btn btn-default button button-medium" onclick="min_perform_otp_task()">
-                    <span>Validate Mobile<i class="fa fa-chevron-right right"></i></span>
-                </button>
-    </div>
-
-	<div id="min_otp_value_div" class="input-text">
-	<label for="otp_val"><?php esc_attr_e( 'Enter OTP', 'woocommerce' ); ?>
-	<span class="required">*</span>
-        <input type="input-text" class="input-text" name="min_otp_value" id="min_otp_value" />
-    </div>
-
-
-    <div id="min_progress_bar_div" >
-        <p class="input-text">Wait for some time before resending One time passsword</p>
-        <div  class="w3-progress-container">
-          <div id="min_progress_bar" class="w3-progressbar w3-green" style="width:1%"></div>
-        </div>
-    </div>
-    <br>
+                                                <button type="button" name="min_request_otp" id="min_request_otp" class="btn btn-default button button-medium" onclick="min_perform_otp_task()">
+                                                        <span id="initial_button_text" >Validate Mobile <i class="fa fa-chevron-right right"></i></span>
+							<span id="final_button_text" style="display:none">Resend OTP <i class="fa fa-chevron-right right"></i></span>
+                                                </button>
+                                        </div>
+    					<br>
 
 															
 	<?php }
@@ -75,6 +82,10 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 				$validation_errors->add( 'reg_mobile__error', __( '<strong>Error</strong>: Mobile Number is not valid', 'woocommerce' ) );
 			}else if(isset($_POST['reg_mobile']) && $this->mobile_already_exists($_POST['reg_mobile'])){
 				$validation_errors->add( 'reg_mobile__error', __( '<strong>Error</strong>: Mobile Number already registered', 'woocommerce' ) );
+			}else if(!isset($_POST['min_otp_value'])){
+				$validation_errors->add( 'reg_mobile__error', __( '<strong>Error</strong>: Please Validate Mobile before procceeding', 'woocommerce' ) );	
+			}else if(isset($_POST['min_otp_value']) && !$this->valid_otp($_POST['reg_mobile'], $_POST['min_otp_value'])){
+				$validation_errors->add( 'reg_mobile__error', __( '<strong>Error</strong>: Mobile authentication failed. Please enter correct OTP', 'woocommerce' ) );
 			}
 	}
 
@@ -88,6 +99,17 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 		else
 			return false;
 	}
+
+	function valid_otp($mobile, $OTP){
+		return true;
+                global $wpdb;
+                $otp_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM ".$wpdb->minbazaar_otp . "WHERE mobile_number = '%s' and otp_value = '%s'", $mobile, $otp));
+
+                if($otp_count > 0)
+                        return true;
+                else
+                        return false;
+        }
 
 
 	function submit_reg_edit_form($user_id) {

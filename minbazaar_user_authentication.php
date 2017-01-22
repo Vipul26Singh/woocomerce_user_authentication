@@ -62,6 +62,43 @@ class Minbazaar_Registration_Attributes{
 			define('MINBUA_OTP_TIMEOUT', 120);
 	}
 
+	public function install_module() {
+                $this->module_tables();
+        }
+
+	private function module_tables() {
+              global $wpdb;
+
+              $wpdb->minbazaar_otp = $wpdb->prefix . 'minbazaar_otp';
+
+              $this->create_tables();
+        }
+
+	public function create_tables() {
+		global $wpdb;
+		$charset_collate = '';
+
+		if ( !empty( $wpdb->charset ) )
+			$charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
+		if ( !empty( $wpdb->collate ) )
+			$charset_collate .= " COLLATE $wpdb->collate";
+
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '$wpdb->minbazaar_otp'" ) != $wpdb->minbazaar_otp) {
+			$sql1 = "CREATE TABLE if not exists " . $wpdb->minbazaar_otp . " (
+					mobile_number VARCHAR(64) NOT NULL,
+                                        otp_value VARCHAR(10) NOT NULL,
+                                        transaction_date datetime NOT NULL,
+                                        error_message VARCHAR(255),
+					PRIMARY KEY (mobile_number, otp_value)
+						) $charset_collate;";
+
+
+			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+			dbDelta( $sql1 );
+		}
+	}
+
+
 
 
 	public function set_module_default_settings() {

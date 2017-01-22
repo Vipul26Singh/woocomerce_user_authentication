@@ -96,17 +96,15 @@ function validate_mobile($mobile){
 
 $mobile = $_POST['mobile_no'];
 $auth_key = $_POST['auth_key'];
-$mobile = '7905217012';
 
-/**if(!isset($auth_key) || $auth_key != AUTHORIZAION_KEY){
+if(!isset($auth_key) || $auth_key != AUTHORIZAION_KEY){
 	echo "You are not authorised";
 	return "You are not authorised";
 }
-**/
+
 $validation_val = validate_mobile($mobile);
 
 if(isset($validation_val)){
-	echo "error";
 	echo $validation_val;
 	return $validation_val;
 }

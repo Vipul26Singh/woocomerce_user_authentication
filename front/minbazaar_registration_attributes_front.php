@@ -93,7 +93,7 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 
 	function delete_otp($mobile){
                 global $wpdb;
-                $wpdb->query( $wpdb->prepare("DELETE FROM ".$wpdb->minbazaar_otp." WHERE mobile_number = '%s'", $mobile));
+                $wpdb->query( $wpdb->prepare("DELETE FROM ".$wpdb->minbazaar_otp." WHERE mobile_number = '%s' or transaction_date < DATE_SUB(NOW(), INTERVAL 5 HOUR)", $mobile));
         }
 
 	function mobile_already_exists($mobile){

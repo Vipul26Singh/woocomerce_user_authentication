@@ -3,6 +3,8 @@
 
 include_once '../../../../wp-load.php';
 
+
+define('AUTHORIZAION_KEY', 'ck_bca5ee0c5f916c12896590606abab1c4cee4cc08');
 function generateOtp($count){
 	$otp ="";
 	for($indx=0; $indx<$count; $indx++){
@@ -68,10 +70,46 @@ function findOtp($mobile){
 	return false;
 }
 
+function mobile_already_exists($mobile){
+                global $wpdb;
+                $user_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM ".$wpdb->prefix."usermeta WHERE meta_key = 'mobile_numer' and meta_value = '%s'", $mobile));
 
 
-//$mobile = $_POST['mobile_no'];
-$mobile = "7905217012";
+                if($user_count > 0)
+                        return true;
+                else
+                        return false;
+        }
+
+function validate_mobile($mobile){
+	if (!isset($mobile) || empty($mobile) || $mobile==null) {
+                                return "Mobile Number is required";
+        }else if( ( strlen($mobile) > 10 || !preg_match('/^[0-9]{10}$/', $mobile) )){
+                                return "Mobile Number is not valid";
+	}else if( mobile_already_exists($mobile)){
+                                return "Mobile Number already registered";
+        }
+	return null;
+}
+
+
+
+$mobile = $_POST['mobile_no'];
+$auth_key = $_POST['auth_key'];
+$mobile = '7905217012';
+
+/**if(!isset($auth_key) || $auth_key != AUTHORIZAION_KEY){
+	echo "You are not authorised";
+	return "You are not authorised";
+}
+**/
+$validation_val = validate_mobile($mobile);
+
+if(isset($validation_val)){
+	echo "error";
+	echo $validation_val;
+	return $validation_val;
+}
 
 
 $otp = null;

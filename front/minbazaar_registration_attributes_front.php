@@ -24,8 +24,8 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 	}
 
 	public function front_scripts() {
-		//wp_enqueue_script( 'jquery-ui');
-                wp_enqueue_script( 'minbua-front-jsssssss', plugins_url( '/js/javascript.js', __FILE__ ), null, false );
+		wp_enqueue_script( 'jquery-ui');
+                wp_enqueue_script( 'minbua-front-jsssssss', plugins_url( '/js/javascript.js', __FILE__ ), array('jquery'), false );
 	
                 wp_enqueue_style( 'minbua-front-css', plugins_url( '/css/minbua_style_front.css', __FILE__ ), false );
                 wp_enqueue_style( 'jquery-ui-css');
@@ -51,6 +51,7 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
         						<input type="input" class="input-text" name="min_otp_value" id="min_otp_value" value="<?php if ( ! empty( $_POST['min_otp_value'] ) ) esc_attr_e( $_POST['min_otp_value'] ); ?>" placeholder="One Time Password" />
 						</p>
     					</div>
+					<div class='inner-otp-error woocommerce-error' id='inner-otp-error' style='display:none'> </div>
 
     					<div id="min_progress_bar_div" style="display:none">
         					<p class="input-text">Wait for some time before resending One time passsword</p>
@@ -58,7 +59,6 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
           						<div id="min_progress_bar" class="w3-progressbar w3-green" style="width:1%"></div>
         					</div>
     					</div>
-					<br>	
 					<div id="min_request_otp_div">
                                                 <button type="button" name="min_request_otp" id="min_request_otp" class="btn btn-default button button-medium" onclick="min_perform_otp_task()">
                                                         <span id="initial_button_text" >Validate Mobile <i class="fa fa-chevron-right right"></i></span>
@@ -76,22 +76,29 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 	function minbazaar_validate_extra_register_fields($username, $email, $validation_errors) {
 
 
-			if (isset($_POST['reg_mobile']) && empty($_POST['reg_mobile'])) {
+			if (!isset($_POST['reg_mobile']) || empty($_POST['reg_mobile'])) {
 				$validation_errors->add( 'reg_mobile__error', __( '<strong>Error</strong>: Mobile Number is required!', 'woocommerce' ) );
-			}else if(isset($_POST['reg_mobile']) && ( strlen($_POST['reg_mobile']) > 10 || !preg_match('/^[0-9]{10}$/', $_POST['reg_mobile']) )){
+			}else if( strlen($_POST['reg_mobile']) > 10 || !preg_match('/^[0-9]{10}$/', $_POST['reg_mobile']) ){
 				$validation_errors->add( 'reg_mobile__error', __( '<strong>Error</strong>: Mobile Number is not valid', 'woocommerce' ) );
-			}else if(isset($_POST['reg_mobile']) && $this->mobile_already_exists($_POST['reg_mobile'])){
+			}else if( $this->mobile_already_exists($_POST['reg_mobile'])){
 				$validation_errors->add( 'reg_mobile__error', __( '<strong>Error</strong>: Mobile Number already registered', 'woocommerce' ) );
 			}else if(!isset($_POST['min_otp_value'])){
 				$validation_errors->add( 'reg_mobile__error', __( '<strong>Error</strong>: Please Validate Mobile before procceeding', 'woocommerce' ) );	
-			}else if(isset($_POST['min_otp_value']) && !$this->valid_otp($_POST['reg_mobile'], $_POST['min_otp_value'])){
+			}else if(!$this->valid_otp($_POST['reg_mobile'], $_POST['min_otp_value'])){
 				$validation_errors->add( 'reg_mobile__error', __( '<strong>Error</strong>: Mobile authentication failed. Please enter correct OTP', 'woocommerce' ) );
+			}else{
+				$this->delete_otp($_POST['reg_mobile']);
 			}
 	}
 
+	function delete_otp($mobile){
+                global $wpdb;
+                $wpdb->query( $wpdb->prepare("DELETE FROM ".$wpdb->minbazaar_otp." WHERE mobile_number = '%s'", $mobile));
+        }
+
 	function mobile_already_exists($mobile){
 		global $wpdb;
-		$user_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM ".$wpdb->prefix."usermeta WHERE meta_key = 'Mobile Number' and meta_value = '%s'", $mobile));
+		$user_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM ".$wpdb->prefix."usermeta WHERE meta_key = 'mobile_number' and meta_value = '%s'", $mobile));
 
 
 		if($user_count > 0)
@@ -117,7 +124,7 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 				$this->fmera_errors()->add( $field->field_name.'_error', __( $field->field_label.' is required!', 'woocommerce' ) );
 			} else {
 				if ( isset( $_POST['reg_mobile'] ) || isset( $_FILES['reg_mobile'] ) ) {
-					update_user_meta( $user_id, 'Mobile Number', sanitize_text_field( $_POST['reg_mobile'] ) );
+					update_user_meta( $user_id, 'mobile_number', sanitize_text_field( $_POST['reg_mobile'] ) );
 				}
 			}
 	}
@@ -125,7 +132,7 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 	function minbazaar_save_extra_register_fields($customer_id) {
 
 			if ( isset( $_POST['reg_mobile'] ) || isset( $_FILES['reg_mobile'] ) ) {
-				update_user_meta( $customer_id, 'Mobile Number', sanitize_text_field( $_POST['reg_mobile'] ) );
+				update_user_meta( $customer_id, 'mobile_number', sanitize_text_field( $_POST['reg_mobile'] ) );
 			}
 	}
 

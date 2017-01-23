@@ -40,11 +40,9 @@ function callAjaxOtpMinb(mobile_no){
 function handleSuccessOtpMinb(php_error){
 	window.run_preogress_otp_minb=false;
 
-	if(php_error){
+	if(php_error && php_error.length > 5){
                 document.getElementById('inner-otp-error').innerHTML = "<strong>Error:</strong>"+php_error;
                 document.getElementById("inner-otp-error").style.display = 'block';
-        }else{
-		document.getElementById("min_request_otp").style.display = 'none';
 	}
 }
 

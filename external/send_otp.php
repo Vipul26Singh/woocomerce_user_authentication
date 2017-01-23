@@ -124,7 +124,7 @@ $message_template = "You have initiated a request at Min Bazaar. Your OTP is {OT
 $message = str_replace("{OTP_VAL}", $otp, $message_template);
 $result = send_bulksms($mobile, $message);
 
-if(!$result[0] == "sent"){
+if($result[0] != "sent"){
     echo "Unable to send OTP at given number. Please check the number again";
     return "Unable to send OTP at given number. Please check the number again";
 }

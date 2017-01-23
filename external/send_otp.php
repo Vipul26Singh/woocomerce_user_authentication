@@ -84,8 +84,8 @@ function mobile_already_exists($mobile){
 function validate_mobile($mobile){
 	if (!isset($mobile) || empty($mobile) || $mobile==null) {
                                 return "Mobile Number is required";
-        }else if( ( strlen($mobile) > 10 || !preg_match('/^[0-9]{10}$/', $mobile) )){
-                                return "Mobile Number is not valid";
+        }else if( ( strlen($mobile) != 10 || !preg_match('/^[0-9]{10}$/', $mobile) )){
+                                return "Enter 10 digit mobile number";
 	}else if( mobile_already_exists($mobile)){
                                 return "Mobile Number already registered";
         }
@@ -123,4 +123,9 @@ if(!isset($otp) || $otp == false){
 $message_template = "You have initiated a request at Min Bazaar. Your OTP is {OTP_VAL} DONT share it with anyone.";
 $message = str_replace("{OTP_VAL}", $otp, $message_template);
 $result = send_bulksms($mobile, $message);
+
+if(!$result[0] == "sent"){
+    echo "Unable to send OTP at given number. Please check the number again";
+    return "Unable to send OTP at given number. Please check the number again";
+}
 

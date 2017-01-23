@@ -5,7 +5,7 @@ function min_perform_otp_task() {
 	document.getElementById("min_otp_value_div").style.display = 'block';
 	document.getElementById("min_progress_bar_div").style.display = 'block';
 	var elem = document.getElementById("min_progress_bar");
-	var timeLimit = 120;
+	var timeLimit = 1000;
 	var width = 1;
 	var id = setInterval(frame, timeLimit);
 	function frame() {

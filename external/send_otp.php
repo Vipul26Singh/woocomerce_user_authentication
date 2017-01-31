@@ -62,7 +62,7 @@ function insertInTable($mobile, $otp, $error_message = null){
 
 function findOtp($mobile){
 	global $wpdb;
-	$otp_val = $wpdb->get_var( $wpdb->prepare("SELECT otp_value FROM ".$wpdb->prefix."minbazaar_otp WHERE mobile_number = '%s' LIMIT 1", $mobile));
+	$otp_val = $wpdb->get_var( $wpdb->prepare("SELECT otp_value FROM ".$wpdb->prefix."minbazaar_otp WHERE mobile_number = '%s' and used!=1 LIMIT 1", $mobile));
 	
 	if(isset($otp_val))
 		return $otp_val;
@@ -93,39 +93,50 @@ function validate_mobile($mobile){
 }
 
 
+$jsonData = json_decode(file_get_contents('php://input'), true);
 
-$mobile = $_POST['mobile_no'];
-$auth_key = $_POST['auth_key'];
+
+$mobile = $jsonData['mobile_no'];
+$auth_key = $jsonData['auth_key'];
 
 if(!isset($auth_key) || $auth_key != AUTHORIZAION_KEY){
 	echo "You are not authorised";
 	return "You are not authorised";
 }
 
-$validation_val = validate_mobile($mobile);
+if(!isset($jsonData['validate']) || strcasecmp($jsonData['validate'], "YES") !=0){
+	$validation_val = validate_mobile($mobile);
 
-if(isset($validation_val)){
-	echo $validation_val;
-	return $validation_val;
+	if(isset($validation_val)){
+		echo $validation_val;
+		return $validation_val;
+	}
+
+
+	$otp = null;
+
+	$otp = findOtp($mobile);
+
+	if(!isset($otp) || $otp == false){
+		$otp = generateOtp(6);
+		insertInTable($mobile, $otp);
+	}
+
+
+	$message_template = "You have initiated a request at Min Bazaar. Your OTP is {OTP_VAL} DONT share it with anyone.";
+	$message = str_replace("{OTP_VAL}", $otp, $message_template);
+	$result = send_bulksms($mobile, $message);
+}else{
+	$mobile = $jsonData['mobile_no'];
+	$otp = $jsonData['OTP'];
+	global $wdb;
+	$otp_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM ".$wpdb->prefix . "minbazaar_otp WHERE mobile_number = '%s' and otp_value = '%s' and used != 1", $mobile, $otp));
+
+	if($otp_count > 0){
+		$otp_count = $wpdb->get_var( $wpdb->prepare("UPDATE ".$wpdb->prefix . "minbazaar_otp set used = 1 WHERE mobile_number = '%s' and otp_value = '%s' ", $mobile, $otp));
+		echo 1;
+	}else{
+		echo 0;
+	}
 }
-
-
-$otp = null;
-
-$otp = findOtp($mobile);
-
-if(!isset($otp) || $otp == false){
-	$otp = generateOtp(6);
-	insertInTable($mobile, $otp);
-}
-
-
-$message_template = "You have initiated a request at Min Bazaar. Your OTP is {OTP_VAL} DONT share it with anyone.";
-$message = str_replace("{OTP_VAL}", $otp, $message_template);
-$result = send_bulksms($mobile, $message);
-
-/**if($result[0] != "sent"){
-    echo "Unable to send OTP at given number. Please check the number again";
-    return "Unable to send OTP at given number. Please check the number again";
-}**/
 

@@ -37,10 +37,10 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 				?>
 
 					<p class="form-row">
-						<label for="reg_mobile"><?php esc_attr_e( 'Mobile Number', 'woocommerce' ); ?> 
+						<label for="reg_mobile"><?php esc_attr_e( 'mobile_number', 'woocommerce' ); ?> 
 					 		<span class="required">*</span> 
 						</label>
-						<input type="text" class="input-text" name="reg_mobile" id="reg_mobile" value="<?php if ( ! empty( $_POST['reg_mobile'] ) ) esc_attr_e( $_POST['reg_mobile'] ); ?>" placeholder="Mobile Number" />
+						<input type="text" class="input-text" name="reg_mobile" id="reg_mobile" value="<?php if ( ! empty( $_POST['reg_mobile'] ) ) esc_attr_e( $_POST['reg_mobile'] ); ?>" placeholder="mobile_number" />
 					</p>
 					
 					<div id="min_otp_value_div" class="input-text" style="display:none">
@@ -93,7 +93,7 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 
 	function delete_otp($mobile){
                 global $wpdb;
-                $wpdb->query( $wpdb->prepare("DELETE FROM ".$wpdb->minbazaar_otp." WHERE mobile_number = '%s' or transaction_date < DATE_SUB(NOW(), INTERVAL 5 HOUR)", $mobile));
+                $wpdb->query( $wpdb->prepare("UPDATE ".$wpdb->prefix."minbazaar_otp set used = 1 WHERE mobile_number = '%s'", $mobile));
         }
 
 	function mobile_already_exists($mobile){
@@ -108,9 +108,8 @@ class Minbazaar_Registration_Attributes_Front extends Minbazaar_Registration_Att
 	}
 
 	function valid_otp($mobile, $OTP){
-		return true;
                 global $wpdb;
-                $otp_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM ".$wpdb->minbazaar_otp . "WHERE mobile_number = '%s' and otp_value = '%s'", $mobile, $otp));
+                $otp_count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM ".$wpdb->prefix . "minbazaar_otp WHERE mobile_number = '%s' and otp_value = '%s' and used!=1", $mobile, $otp));
 
                 if($otp_count > 0)
                         return true;

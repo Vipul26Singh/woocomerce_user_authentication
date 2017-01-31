@@ -26,10 +26,15 @@ function min_perform_otp_task() {
 }
 
 function callAjaxOtpMinb(mobile_no){
+	var sendData = {};
+	sendData["mobile_no"] = mobile_no;
+	sendData["auth_key"] = "ck_bca5ee0c5f916c12896590606abab1c4cee4cc08";
+	
 	jQuery.ajax({
                         'type': 'POST',
-                        'url': 'https://www.minbazaar.com/wp-content/plugins/minbazaar_user_authentication/external/send_otp.php',
-                        'data': {'mobile_no':mobile_no, 'auth_key':'ck_bca5ee0c5f916c12896590606abab1c4cee4cc08'},
+                      'url': 'https://www.minbazaar.com/wp-content/plugins/minbazaar_user_authentication/external/send_otp.php',
+			'contentType': 'application/json',
+                        'data': JSON.stringify(sendData),
                          error: function(xhr, status, error) {
                            alert(xhr.responseText);
                             },

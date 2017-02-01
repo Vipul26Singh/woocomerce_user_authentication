@@ -1,6 +1,6 @@
 <?php 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
-	$fmera = new FME_Registration_Attributes_Front();
+	$minbua = new Minbazaar_Registration_Attributes_Front();
 ?>
 
 <?php
@@ -32,7 +32,7 @@ get_header(); ?>
 				<form method="post" enctype="multipart/form-data">
 					<?php 
 						$user = get_current_user_id();
-						$fmera->fme_extra_registration_form_edit($user);
+						$minbua->minbazaar_extra_registration_form_edit($user);
 					?>
 					<div class="clear"></div>
 					 <input type="hidden" name="action" value="SubmitRegForm" />

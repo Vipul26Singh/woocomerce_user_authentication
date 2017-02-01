@@ -126,6 +126,10 @@ if(!isset($jsonData['validate']) || strcasecmp($jsonData['validate'], "YES") !=0
 	$message_template = "You have initiated a request at Min Bazaar. Your OTP is {OTP_VAL} DONT share it with anyone.";
 	$message = str_replace("{OTP_VAL}", $otp, $message_template);
 	$result = send_bulksms($mobile, $message);
+
+	if($result[0] == "fail")
+                echo $result[1];
+	
 }else{
 	$mobile = $jsonData['mobile_no'];
 	$otp = $jsonData['OTP'];
